@@ -45,7 +45,7 @@ for i in prices:
         fmax = price_value
         maxplace = i.find("td", class_="state-td-width first-col").text.strip()
 
-    elif price_value < fmin:
+    if price_value < fmin:
         fmin = price_value
         minplace = i.find("td", class_="state-td-width first-col").text.strip()
 print("Lowest price for ",fuel," = ",fmin)
