@@ -2,19 +2,18 @@ import streamlit as st
 import requests
 from bs4 import BeautifulSoup
 
-# Setup page configuration
 st.set_page_config(page_title="Fuel Cost Calculator", page_icon="⛽", layout="centered")
 
 st.title("⛽ Kerala Fuel Cost Calculator")
 
-# Access API key from secrets
+
 try:
     API_KEY = st.secrets["OPENROUTE_API_KEY"]
 except Exception:
     st.error("API Key not found in secrets. Please configure .streamlit/secrets.toml")
     st.stop()
 
-@st.cache_data(ttl=3600)  # Cache for 1 hour
+@st.cache_data(ttl=3600)  
 def get_fuel_price(fuel_type, district):
     url = f"https://www.v3cars.com/kerala/{fuel_type}-price-in-{district.lower()}"
     try:
@@ -69,14 +68,15 @@ def get_coordinates(place_name):
         if not data.get('features'):
             return None
         lon, lat = data['features'][0]['geometry']['coordinates']
-        return [lon, lat]
+        return (lon, lat)  # tuple is hashable, list is not
     except Exception:
         return None
 
 @st.cache_data
 def get_distance(start_coords, end_coords):
     url = "https://api.openrouteservice.org/v2/directions/driving-car"
-    body = {"coordinates": [start_coords, end_coords]}
+    # Convert to list for the JSON body (API expects list)
+    body = {"coordinates": [list(start_coords), list(end_coords)]}
     headers = {"Authorization": API_KEY, "Content-Type": "application/json"}
     try:
         r = requests.post(url, json=body, headers=headers)
